@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Show - Perguntas e Respostas</title>
+    <style>
+
+	h1 {
+	background-color: #020b4d;
+	color: white;
+	margin: 0;
+	padding: 30px;
+	 }
+        body {
+	    padding: 10px 20px 30px 40px;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0px;
+            background-color: #f0f8ff;
+            color: black;
+        }
+        .question-container {
+            margin: 20px auto;
+            padding: 20px;
+            border: 2px solid #87ceeb;
+            border-radius: 12px;
+            background-color: #ffffff;
+            max-width: 600px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+	    font-weight: bold;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: #87ceeb;
+            color: black;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #4682b4;
+        }
+        #answers button {
+            display: block;
+            margin: 10px auto;
+            width: 80%;
+        }
+        #answers button.selected {
+            background-color: #32cd32;
+            color: black;
+            font-weight: bold;
+        }
+        #popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ffdddd;
+            padding: 40px;
+            border: 4px solid #ff0000;
+            border-radius: 24px;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        #final-stats {
+            display: none;
+            margin-top: 20px;
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Teste Bíblico - Evangelho de Marcos</h1>
+
+    <div id="stats">
+        <p>Corretas: <span id="correctCount">0</span></p>
+        <p>Incorretas: <span id="wrongCount">0</span></p>
+        <p>Pendentes: <span id="pendingCount"></span></p>
+    </div>
+
+    <div class="question-container">
+        <p id="question"></p>
+        <div id="answers"></div>
+    </div>
+
+    <p id="reference"></p>
+    <p id="message"></p>
+
+    <button id="confirmButton">Confirmar Resposta</button>
+    <button id="nextButton">Próxima Pergunta</button>
+
+    <div id="popup">
+        <p>Leia mais a Bíblia!</p>
+        <button onclick="closePopup()">Fechar</button>
+    </div>
+
+    <div id="final-stats">
+        <h2>Resultados Finais</h2>
+        <p id="final-message"></p>
+        <p>Total de Corretas: <span id="finalCorrect"></span></p>
+        <p>Total de Incorretas: <span id="finalWrong"></span></p>
+    </div>
+
+    <script>
+        const questions = 
+[
+			{ question: "Quem preparou o caminho para Jesus, batizando no deserto?", answers: ["Elias", "João Batista", "Moisés", "Abraão"], correct: "João Batista", reference: "Marcos 1:4" },
+			{ question: "O que aconteceu quando Jesus foi batizado?", answers: ["O céu se abriu", "Houve um terremoto", "Um anjo apareceu", "As águas ficaram agitadas"], correct: "O céu se abriu", reference: "Marcos 1:10-11" },
+			{ question: "Quantos homens levaram o paralítico para Jesus, descendo-o pelo telhado?", answers: ["Dois", "Três", "Quatro", "Cinco"], correct: "Quatro", reference: "Marcos 2:3" },
+  { question: "Qual foi o primeiro discípulo chamado por Jesus que era coletor de impostos?", answers: ["Pedro", "Judas", "Levi", "Tiago"], correct: "Levi", reference: "Marcos 2:14" },
+  { question: "Em que dia Jesus curou o homem com a mão ressequida?", answers: ["Segunda-feira", "Sábado", "Domingo", "Sexta-feira"], correct: "Sábado", reference: "Marcos 3:1-5" },
+  { question: "Quantos discípulos Jesus escolheu para segui-lo de perto?", answers: ["10", "11", "12", "13"], correct: "12", reference: "Marcos 3:13-19" },
+  { question: "O que Jesus fez quando a tempestade começou no barco?", answers: ["Dormiu", "Repreendeu o vento", "Pulou na água", "Orava em silêncio"], correct: "Repreendeu o vento", reference: "Marcos 4:39" },
+  { question: "Qual parábola Jesus contou para ensinar sobre a fé pequena mas poderosa?", answers: ["O semeador", "O grão de mostarda", "O tesouro escondido", "A rede de pesca"], correct: "O grão de mostarda", reference: "Marcos 4:30-32" },
+  { question: "O que os demônios pediram para fazer ao serem expulsos do homem em Gadara?", answers: ["Ir para os porcos", "Retornar ao inferno", "Ficar no homem", "Ir para o templo"], correct: "Ir para os porcos", reference: "Marcos 5:12" },
+  { question: "Como Jesus ressuscitou a filha de Jairo?", answers: ["Chamou-a pelo nome", "Tocou suas mãos", "Disse 'Talita cumi'", "Fez uma oração longa"], correct: "Disse 'Talita cumi'", reference: "Marcos 5:41" },
+  { question: "Quantos pães e peixes Jesus usou para alimentar 5.000 pessoas?", answers: ["5 pães e 2 peixes", "7 pães e 3 peixes", "4 pães e 1 peixe", "10 pães e 5 peixes"], correct: "5 pães e 2 peixes", reference: "Marcos 6:41" },
+  { question: "Quantos cestos sobraram após a multiplicação dos pães e peixes?", answers: ["10", "12", "7", "5"], correct: "12", reference: "Marcos 6:43" },
+  { question: "O que Jesus disse ao surdo e gago para curá-lo?", answers: ["Levante-se", "Seja curado", "Efatá", "Fique em paz"], correct: "Efatá", reference: "Marcos 7:34" },
+  { question: "Por que os fariseus criticaram os discípulos de Jesus?", answers: ["Por comerem sem lavar as mãos", "Por não jejuarem", "Por trabalharem no sábado", "Por curarem doentes"], correct: "Por comerem sem lavar as mãos", reference: "Marcos 7:5" },
+  { question: "Quantos pães Jesus usou para alimentar 4.000 pessoas?", answers: ["5", "6", "7", "8"], correct: "7", reference: "Marcos 8:6" },
+  { question: "Quem Jesus perguntou: 'Quem dizem os homens que eu sou?'", answers: ["João Batista", "Os discípulos", "A multidão", "Os fariseus"], correct: "Os discípulos", reference: "Marcos 8:27" },
+  { question: "O que Jesus disse aos discípulos na transfiguração?", answers: ["Não contem a ninguém.", "Anunciem imediatamente.", "Construam um altar.", "Sigam-me agora."], correct: "Não contem a ninguém.", reference: "Marcos 9:9" },
+  { question: "Quem apareceu com Jesus na transfiguração?", answers: ["Elias e Moisés", "João Batista e Abraão", "Davi e Salomão", "Jeremias e Isaías"], correct: "Elias e Moisés", reference: "Marcos 9:4" },
+  { question: "O que Jesus disse sobre quem quiser ser o maior no Reino de Deus?", answers: ["Deve ser o mais rico", "Deve ser o mais sábio", "Deve ser servo de todos", "Deve ser o mais obediente"], correct: "Deve ser servo de todos", reference: "Marcos 10:43-44" },
+  { question: "Qual foi o pedido do cego Bartimeu?", answers: ["Cure minha cegueira.", "Eu quero ver.", "Senhor, salva-me.", "Aumente minha fé."], correct: "Eu quero ver.", reference: "Marcos 10:51" },
+  { question: "O que as pessoas gritaram na entrada triunfal de Jesus em Jerusalém?", answers: ["Hosana!", "Crucifiquem-no!", "Glória a Deus!", "Bendito seja Davi!"], correct: "Hosana!", reference: "Marcos 11:9-10" },
+  { question: "O que Jesus fez com a figueira que não tinha frutos?", answers: ["A cortou", "A amaldiçoou", "A regou", "A deixou como estava"], correct: "A amaldiçoou", reference: "Marcos 11:14" },
+  { question: "Qual é o maior mandamento, segundo Jesus?", answers: ["Amar a Deus e ao próximo.", "Guardar o sábado.", "Honrar pai e mãe.", "Não matarás."], correct: "Amar a Deus e ao próximo.", reference: "Marcos 12:29-31" },
+  { question: "Quem deu a maior oferta no templo?", answers: ["Os ricos", "A viúva", "Ninguém", "Jesus não especificou"], correct: "A viúva", reference: "Marcos 12:43-44" },
+  { question: "O que Jesus disse sobre o templo?", answers: ["Será destruído.", "Ficará para sempre.", "Será reconstruído.", "Ninguém o tocará."], correct: "Será destruído.", reference: "Marcos 13:2" },
+  { question: "Quem não sabe o dia ou a hora da volta de Jesus?", answers: ["Apenas os anjos", "Apenas os homens", "Todos, exceto o Pai", "Jesus e o Pai"], correct: "Todos, exceto o Pai", reference: "Marcos 13:32" },
+  { question: "Quem traiu Jesus?", answers: ["Pedro", "Judas", "João", "Tiago"], correct: "Judas", reference: "Marcos 14:10" },
+  { question: "O que Jesus fez no Getsêmani?", answers: ["Fugiu", "Dormiu", "Orou", "Pregou"], correct: "Orou", reference: "Marcos 14:32" },
+  { question: "Quem carregou a cruz de Jesus?", answers: ["Simão de Cirene", "Pedro", "João", "Judas"], correct: "Simão de Cirene", reference: "Marcos 15:21" },
+  { question: "Que título estava escrito na cruz de Jesus?", answers: ["Filho de Deus", "Rei dos Judeus", "Messias", "Cordeiro de Deus"], correct: "Rei dos Judeus", reference: "Marcos 15:26" },
+  { question: "Quem encontrou o túmulo vazio de Jesus ao amanhecer do primeiro dia da semana?", answers: ["Maria Madalena, Maria mãe de Tiago e Salomé", "Pedro e João", "As discípulas de Jesus", "Os guardas romanos"], correct: "Maria Madalena, Maria mãe de Tiago e Salomé", reference: "Marcos 16:1-4" },
+  { question: "O que o jovem vestido de branco disse às mulheres no túmulo?", answers: ["Jesus ressuscitou, Ele não está aqui.", "Vão e chamem os discípulos imediatamente.", "Jesus está no céu, esperando por vocês.", "Voltem para Galileia e o encontrarão lá."], correct: "Jesus ressuscitou, Ele não está aqui.", reference: "Marcos 16:6" },
+  { question: "O que João Batista pregava no deserto?", answers: ["Arrependimento para remissão de pecados", "O cumprimento da lei de Moisés", "A chegada do Reino de Davi", "A destruição do templo"], correct: "Arrependimento para remissão de pecados", reference: "Marcos 1:4" },
+  { question: "Por que os fariseus criticaram Jesus quando Ele curou o paralítico?", answers: ["Porque Ele disse que perdoava pecados", "Porque Ele curou em um sábado", "Porque não seguiu os rituais de cura", "Porque Ele curou em público"], correct: "Porque Ele disse que perdoava pecados", reference: "Marcos 2:5-7" },
+  { question: "Qual foi a reação dos fariseus após Jesus curar no sábado?", answers: ["Decidiram matá-lo", "Louvaram a Deus", "Ignoraram o ocorrido", "Foram contar ao povo"], correct: "Decidiram matá-lo", reference: "Marcos 3:6" },
+  { question: "Na parábola do semeador, qual foi o destino das sementes que caíram entre os espinhos?", answers: ["Foram sufocadas", "Cresceram e deram frutos", "Foram comidas pelos pássaros", "Ficaram sem raízes"], correct: "Foram sufocadas", reference: "Marcos 4:7" },
+  { question: "Qual foi o nome da mulher que foi curada ao tocar nas vestes de Jesus?", answers: ["Não é mencionado", "Maria", "Salomé", "Marta"], correct: "Não é mencionado", reference: "Marcos 5:25-34" },
+  { question: "Por que Jesus não pôde fazer muitos milagres em sua cidade natal?", answers: ["Por causa da incredulidade das pessoas", "Porque os fariseus o impediram", "Porque os discípulos estavam ausentes", "Porque era sábado"], correct: "Por causa da incredulidade das pessoas", reference: "Marcos 6:5-6" },
+  { question: "Quantos cestos sobraram após a alimentação de 4.000 pessoas?", answers: ["Sete", "Doze", "Cinco", "Nenhum"], correct: "Sete", reference: "Marcos 8:8" },
+  { question: "O que Jesus disse ao homem que expulsou demônios em Seu nome?", answers: ["Não o impeçam.", "Chamem-no para o grupo.", "Ele está errado.", "Ensinem-no corretamente."], correct: "Não o impeçam.", reference: "Marcos 9:39" },
+  { question: "O que Jesus disse sobre as riquezas e o Reino de Deus?", answers: ["É mais difícil um rico entrar no Reino de Deus do que um camelo passar pelo fundo de uma agulha.", "Os ricos têm mais responsabilidades no Reino de Deus.", "Deus dará riquezas a quem o servir.", "A riqueza é uma bênção garantida no Reino de Deus."], correct: "É mais difícil um rico entrar no Reino de Deus do que um camelo passar pelo fundo de uma agulha.", reference: "Marcos 10:25" },
+  { question: "O que Jesus fez ao entrar no templo em Jerusalém?", answers: ["Expulsou os que compravam e vendiam", "Orava com os discípulos", "Pregou sobre o Reino de Deus", "Distribuiu pão aos pobres"], correct: "Expulsou os que compravam e vendiam", reference: "Marcos 11:15" },
+  { question: "Quem tentou pegar Jesus em contradição com uma pergunta sobre pagar impostos a César?", answers: ["Os fariseus e herodianos", "Os saduceus", "Os escribas", "Os discípulos de João"], correct: "Os fariseus e herodianos", reference: "Marcos 12:13" },
+  { question: "O que Jesus disse sobre os falsos cristos e profetas?", answers: ["Eles enganarão a muitos.", "Serão facilmente reconhecidos.", "Não terão poder algum.", "Serão mortos rapidamente."], correct: "Eles enganarão a muitos.", reference: "Marcos 13:22" },
+  { question: "Qual foi o sinal que Judas deu para identificar Jesus aos guardas?", answers: ["Um beijo", "Um aperto de mão", "Apontou o dedo", "Chamou seu nome"], correct: "Um beijo", reference: "Marcos 14:44" },
+  { question: "Que palavras Jesus disse ao morrer na cruz?", answers: ["Deus meu, Deus meu, por que me desamparaste?", "Está consumado!", "Pai, perdoa-lhes, pois não sabem o que fazem.", "Em tuas mãos entrego meu espírito."], correct: "Deus meu, Deus meu, por que me desamparaste?", reference: "Marcos 15:34" },
+  { question: "Qual foi a reação inicial das mulheres ao ouvir do jovem no túmulo que Jesus havia ressuscitado?", answers: ["Ficaram amedrontadas e não disseram nada a ninguém.", "Voltaram e anunciaram aos discípulos.", "Correram para contar às multidões.", "Oraram no local."], correct: "Ficaram amedrontadas e não disseram nada a ninguém.", reference: "Marcos 16:8" }
+]; 
+
+        let currentQuestionIndex = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let pendingCount = questions.length;
+        
+        const shuffledQuestions = questions.sort(() => Math.random() - 0.5);
+
+        function updateStats() {
+            document.getElementById("correctCount").innerText = correctCount;
+            document.getElementById("wrongCount").innerText = wrongCount;
+            document.getElementById("pendingCount").innerText = pendingCount;
+        }
+
+        function loadQuestion() {
+            const questionData = shuffledQuestions[currentQuestionIndex];
+            document.getElementById("question").innerText = questionData.question;
+            document.getElementById("reference").innerText = "";
+            document.getElementById("message").innerText = "";
+            const answersContainer = document.getElementById("answers");
+            answersContainer.innerHTML = "";
+
+            questionData.answers.forEach(answer => {
+                const button = document.createElement("button");
+                button.innerText = answer;
+                button.onclick = () => selectAnswer(button);
+                answersContainer.appendChild(button);
+            });
+        }
+
+        function selectAnswer(selectedButton) {
+            const buttons = document.querySelectorAll("#answers button");
+            buttons.forEach(button => button.classList.remove("selected"));
+            selectedButton.classList.add("selected");
+        }
+
+        function confirmAnswer() {
+            const selectedButton = document.querySelector("#answers button.selected");
+            if (!selectedButton) {
+                alert("Por favor, selecione uma resposta!");
+                return;
+            }
+
+            const selectedAnswer = selectedButton.innerText;
+            const questionData = shuffledQuestions[currentQuestionIndex];
+
+            if (selectedAnswer === questionData.correct) {
+                correctCount++;
+                document.getElementById("message").innerText = `Certa Resposta! Referência: (${questionData.reference}).`;
+                document.getElementById("message").style.color = "green";
+            } else {
+                wrongCount++;
+                document.getElementById("message").innerText = `Resposta errada! A correta é "${questionData.correct}" (${questionData.reference}).`;
+                document.getElementById("message").style.color = "red";
+                document.getElementById("popup").style.display = "block";
+            }
+
+            
+            pendingCount--;
+            updateStats();
+
+            document.getElementById("confirmButton").disabled = true;
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < shuffledQuestions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+                document.getElementById("confirmButton").disabled = false;
+            } else {
+                showFinalStats();
+            }
+        }
+
+        function closePopup() {
+            document.getElementById("popup").style.display = "none";
+        }
+
+        function showFinalStats() {
+            const finalMessage = document.getElementById("final-message");
+            const finalCorrect = document.getElementById("finalCorrect");
+            const finalWrong = document.getElementById("finalWrong");
+
+            finalCorrect.innerText = correctCount;
+            finalWrong.innerText = wrongCount;
+
+            if (correctCount > wrongCount) {
+                finalMessage.innerText = "Parabéns! Você está acima da média!";
+            } else {
+                finalMessage.innerText = "Leia mais a Bíblia!";
+            }
+
+            document.getElementById("final-stats").style.display = "block";
+        }
+
+        document.getElementById("confirmButton").addEventListener("click", confirmAnswer);
+        document.getElementById("nextButton").addEventListener("click", nextQuestion);
+
+        updateStats();
+        loadQuestion();
+    </script>
+</body>
+</html>
